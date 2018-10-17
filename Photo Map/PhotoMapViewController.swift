@@ -9,7 +9,21 @@
 import UIKit
 import MapKit
 
-class PhotoMapViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate, MKMapViewDelegate {
+class PhotoAnnotation: NSObject, MKAnnotation {
+    var coordinate: CLLocationCoordinate2D = CLLocationCoordinate2DMake(0, 0)
+    var photo: UIImage!
+    
+    var title: String? {
+        return "\(coordinate.latitude)"
+    }
+    
+}
+
+
+class PhotoMapViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate, MKMapViewDelegate, LocationsViewControllerDelegate {
+    
+    
+    
     
     var vc: UIImagePickerController!
 
@@ -19,6 +33,7 @@ class PhotoMapViewController: UIViewController, UIImagePickerControllerDelegate,
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        
         let sfRegion = MKCoordinateRegionMake(CLLocationCoordinate2DMake(37.783333, -122.416667),MKCoordinateSpanMake(0.1, 0.1))
         mapView.setRegion(sfRegion, animated: false)
         
@@ -27,6 +42,33 @@ class PhotoMapViewController: UIViewController, UIImagePickerControllerDelegate,
         
 
         // Do any additional setup after loading the view.
+    }
+    
+    func locationsPickedLocation(controller: LocationsViewController, latitude: NSNumber, longitude: NSNumber){
+        self.navigationController?.popToViewController(self, animated: true)
+        let locationCoordinate = CLLocationCoordinate2DMake(latitude.doubleValue, longitude.doubleValue)
+        
+        let annotation = MKPointAnnotation()
+        annotation.coordinate = locationCoordinate
+        annotation.title = "\(latitude), \(longitude)"
+        mapView.addAnnotation(annotation)
+        
+    }
+    
+    func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
+        let reuseID = "myAnnotationView"
+        
+        var annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: reuseID)
+        if (annotationView == nil) {
+            annotationView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: reuseID)
+            annotationView!.canShowCallout = true
+            annotationView!.leftCalloutAccessoryView = UIImageView(frame: CGRect(x:0, y:0, width: 50, height:50))
+        }
+        
+        let imageView = annotationView?.leftCalloutAccessoryView as! UIImageView
+        imageView.image = UIImage(named: "camera")
+        
+        return annotationView
     }
 
     override func didReceiveMemoryWarning() {
@@ -70,7 +112,9 @@ class PhotoMapViewController: UIViewController, UIImagePickerControllerDelegate,
     // In a storyboard-based application, you will often want to do a little preparation before navigation
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         // Get the new view controller using segue.destinationViewController.
+        let destinationVC = segue.destination as! LocationsViewController
         // Pass the selected object to the new view controller.
+        destinationVC.delegate =  self
     }
     
 

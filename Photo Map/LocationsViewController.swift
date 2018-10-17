@@ -7,9 +7,16 @@
 //
 
 import UIKit
+// Protocol definition - top of LocationsViewController.swift
+protocol LocationsViewControllerDelegate : class {
+    func locationsPickedLocation(controller: LocationsViewController, latitude: NSNumber, longitude: NSNumber)
+}
 
 class LocationsViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, UISearchBarDelegate {
-
+    
+    weak var delegate : LocationsViewControllerDelegate!
+    
+    
     // TODO: Fill in actual CLIENT_ID and CLIENT_SECRET
     let CLIENT_ID = "QA1L0Z0ZNA2QVEEDHFPQWK0I5F1DE3GPLSNW4BZEBGJXUCFL"
     let CLIENT_SECRET = "W2AOE1TYC4MHK5SZYOUGX0J3LVRALMPB4CXT3ZH21ZCPUMCU"
@@ -55,6 +62,7 @@ class LocationsViewController: UIViewController, UITableViewDelegate, UITableVie
         let lngString = "\(lng)"
 
         print(latString + " " + lngString)
+        delegate.locationsPickedLocation(controller: self, latitude: lat, longitude: lng)
     }
     
     func searchBar(_ searchBar: UISearchBar, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
